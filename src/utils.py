@@ -13,7 +13,7 @@ import numpy as np
         
 #     return angle 
 
-def calculate_angle(a,b,c):
+def calculate_angle(a,b,c) -> float:
     a = np.array(a) # First
     b = np.array(b) # Mid
     c = np.array(c) # End
@@ -25,3 +25,9 @@ def calculate_angle(a,b,c):
         angle = 360-angle
         
     return angle 
+
+def is_standing(shoulder, hip, threshold=0.3) -> bool:
+    if abs(hip[1] - shoulder[1]) > threshold:
+        return True
+    else:
+        return False
