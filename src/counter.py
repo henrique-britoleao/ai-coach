@@ -18,4 +18,4 @@ class Counter:
         return valid_reps, not_valid_reps
     
     def __str__(self):
-        return f"Counter of reps: {self.valid_reps}"
+        return f"{self.valid_reps}"

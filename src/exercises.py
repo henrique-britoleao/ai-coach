@@ -1,9 +1,11 @@
-import mediapipe.solutions.pose as mp_pose
+import mediapipe as mp
 
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 
 from src.utils import calculate_angle
+
+mp_pose = mp.solutions.pose
 
 class Stage(Enum):
     ECCENTRIC = auto()
@@ -26,7 +28,7 @@ class Exercise(ABC):
 class PushUp(Exercise):   
     stage: Stage 
     
-    def validate_concentric(self, landmarks) -> bool:
+    def validate_eccentric(self, landmarks) -> bool:
         elbow_angle, hip_angle = self._extract_angles(landmarks)
         hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
                landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
@@ -41,7 +43,7 @@ class PushUp(Exercise):
         else:
             return False
     
-    def validate_eccentric(self, landmarks) -> bool:
+    def validate_concentric(self, landmarks) -> bool:
         elbow_angle, hip_angle = self._extract_angles(landmarks)
         hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
                landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
