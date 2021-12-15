@@ -50,3 +50,6 @@ ENV/
 env.bak/
 venv.bak/
 #
+
+classification_model/Data_Train
+classification_model/Data_Test
