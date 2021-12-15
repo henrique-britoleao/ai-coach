@@ -1,10 +1,11 @@
 #####  Imports  #####
 import mediapipe as mp
+import numpy as np
 
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 
-from src.utils import calculate_angle, is_standing
+from src.utils import calculate_angle, is_standing, get_coord
 
 mp_pose = mp.solutions.pose
 
@@ -62,16 +63,11 @@ class PushUp(Exercise):
             return False
     
     def _extract_angles(self, landmarks):
-        shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, # TODO: test with 3-D points
-                         landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-        elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
-        wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-        knee = [landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
-        hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
+        shoulder = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value])
+        elbow = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value])
+        wrist = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value])
+        knee = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value])
+        hip = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
         
         elbow_angle = calculate_angle(shoulder, elbow, wrist)
         hip_angle = calculate_angle(shoulder, hip, knee)
@@ -98,14 +94,10 @@ class Squat(Exercise):
             return False
         
     def _extract_angles(self, landmarks): 
-        shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, # TODO: test with 3-D points
-                         landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y] # TODO: use right as well 
-        knee = [landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
-        hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
-        ankle = [landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].x,
-                 landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].y]
+        shoulder = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]) # TODO: use right as well 
+        knee = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value])
+        hip = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
+        ankle = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value])
         
         hip_angle = calculate_angle(shoulder, hip, knee)
         knee_angle = calculate_angle(hip, knee, ankle)
@@ -132,14 +124,10 @@ class Dip(Exercise):
             return False
 
     def _extract_angles(self, landmarks): 
-        shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, # TODO: test with 3-D points
-                         landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y] # TODO: use right as well 
-        wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-        elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
-        hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-               landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
+        shoulder = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]) # TODO: use right as well 
+        wrist = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value])
+        elbow = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value])
+        hip = get_coord(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
         
         elbow_angle = calculate_angle(shoulder, elbow, wrist)
         standing_bool = is_standing(shoulder, hip)

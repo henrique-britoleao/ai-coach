@@ -4,7 +4,6 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-from src.utils import calculate_angle
 from src.exercises import Exercise, Stage, PushUp, Squat, Dip
 from src.counter import Counter
 
@@ -38,20 +37,6 @@ def run(exercise: Exercise):
             # Extract landmarks
             try:
                 landmarks = results.pose_world_landmarks.landmark
-                
-                shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                    landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-                knee = [landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,
-                         landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
-                hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                        landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
-                
-                hip_shoulder_dist = abs(hip[1] - shoulder[1])
-                
-                cv2.putText(image, str(hip_shoulder_dist), 
-                           (10, 100), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA
-                                )
 
                 # validate eccentric phase
                 if exercise.stage == Stage.START:
@@ -103,4 +88,4 @@ def run(exercise: Exercise):
         cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    run(Dip())
+    run(PushUp())
