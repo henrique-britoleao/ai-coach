@@ -2,7 +2,8 @@
 import mediapipe as mp
 import pandas as pd
 import numpy as np
-
+from tensorflow.keras.models import load_model
+import pickle
 from typing import List, Dict
 
 from src.exercises import Exercise, PushUp, Dip, SitUp, Squat
@@ -43,11 +44,16 @@ EXERCISE_DICT = {
     'squats': Squat
 }
 
+MODEL_PATH = './classification_model/Model/model2'
+ENCODER_PATH = './classification_model/Model/encoder2.pkl'
+POINTS_PATH = './classification_model/Model/extracted_points.pickle'
+PREDICTION_PATH = './classification_model/Model/predicted_exercise.pickle'
+
 #####  Prediction Functions  #####
 def extract_exercise_detection_points(
     landmarks, 
     detection_points: List[MP_POSE.PoseLandmark]=DETECTION_POINTS
-) -> pd.Datarame:
+) -> pd.DataFrame:
     extracted_points = []
 
     for point in detection_points:
@@ -73,3 +79,17 @@ def predict_exercise(extracted_points_df: pd.DataFrame,
     exercise = values[np.argmax(counts)]
 
     return exercise_dict[exercise]
+
+if __name__ == '__main__':
+    model = load_model(MODEL_PATH) # exercise detection model
+
+    with open(ENCODER_PATH,'rb') as f:
+        encoder = pickle.load(f)
+
+    with open(POINTS_PATH,'rb') as f:
+        extracted_points_df = pickle.load(f)
+
+    exercise = predict_exercise(extracted_points_df, model, encoder)() 
+    
+    with open(PREDICTION_PATH, 'wb') as f:
+        pickle.dump(exercise, f)

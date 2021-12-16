@@ -133,4 +133,7 @@ class Dip(Exercise):
         standing_bool = is_standing(shoulder, hip)
 
         return elbow_angle, standing_bool
+
+class SitUp(Exercise):
+    pass
     
