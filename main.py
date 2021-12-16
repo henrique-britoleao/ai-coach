@@ -1,26 +1,36 @@
 #####  Imports  #####
-
-import cv2
+import tensorflow as tf
 import mediapipe as mp
-import numpy as np
+import pandas as pd
+import pickle
+import cv2
 
-from src.exercises import Exercise, Stage, PushUp, Squat, Dip
+from src.exercises import Stage
+from src.exercise_detection import (extract_exercise_detection_points, predict_exercise)
 from src.counter import Counter
+
+MODEL_PATH = './Model/model2'
+ENCODER_PATH = './Model/encoder2.pkl'
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-def run(exercise: Exercise):
-
+def run():
     cap = cv2.VideoCapture(0)
 
-    # Curl counter variables
-    counter = Counter()
-    exercise.set_stage(Stage.START)
-
+    # Initialize variables
+    counter = Counter() # counter
+    exercise = None 
+    iter = 0 # iteration counter
+    extracted_points_df = pd.DataFrame() # exercise detection df
+    model = tf.keras.models.load_model(MODEL_PATH) # exercise detection model
+    with open(ENCODER_PATH,'rb') as file:
+        encoder = pickle.load(file)
+    
     # Setup mediapipe instance
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
         while cap.isOpened():
+            
             ret, frame = cap.read()
             
             # Recolor image to RGB
@@ -38,18 +48,27 @@ def run(exercise: Exercise):
             try:
                 landmarks = results.pose_world_landmarks.landmark
 
-                # validate eccentric phase
-                if exercise.stage == Stage.START:
-                    if exercise.validate_eccentric(landmarks):
-                        exercise.set_stage(Stage.ECCENTRIC)
-                if exercise.stage == Stage.CONCENTRIC:
-                    if exercise.validate_eccentric(landmarks):
-                        exercise.set_stage(Stage.ECCENTRIC)
-                        counter.add_rep()
-                # # validate concentric phase
-                if exercise.stage == Stage.ECCENTRIC:
-                    if exercise.validate_concentric(landmarks):
-                        exercise.set_stage(Stage.CONCENTRIC)
+                if not exercise: # detect exercise
+                    extracted_points = extract_exercise_detection_points(landmarks)
+                    extracted_points_df = extracted_points_df.append(extracted_points)
+                
+                    if iter%10 == 0 :
+                        exercise = predict_exercise(extracted_points_df, model, encoder)() 
+                        extracted_points_df = pd.DataFrame() # flush all stored points
+                
+                else: # count reps
+                    # validate eccentric phase
+                    if exercise.stage == Stage.START:
+                        if exercise.validate_eccentric(landmarks):
+                            exercise.set_stage(Stage.ECCENTRIC)
+                    if exercise.stage == Stage.CONCENTRIC:
+                        if exercise.validate_eccentric(landmarks):
+                            exercise.set_stage(Stage.ECCENTRIC)
+                            counter.add_rep()
+                    # # validate concentric phase
+                    if exercise.stage == Stage.ECCENTRIC:
+                        if exercise.validate_concentric(landmarks):
+                            exercise.set_stage(Stage.CONCENTRIC)
                         
             except:
                 pass
@@ -88,4 +107,4 @@ def run(exercise: Exercise):
         cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    run(PushUp())
+    run()
